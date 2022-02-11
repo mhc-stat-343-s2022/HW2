@@ -1,0 +1,41 @@
+---
+title: 'Homework 2: R Part'
+subtitle: "STAT 343: Mathematical Statistics"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Details
+
+### How to Write Up
+
+The written part of this assignment can be either typeset using latex or hand written.
+
+### Grading
+
+5% of your grade on this assignment is for turning in something legible and organized.
+
+An additional 15% of your grade is for completion.  A quick pass will be made to ensure that you've made a reasonable attempt at all problems.
+
+Across both the written part and the R part, in the range of 1 to 3 problems will be graded more carefully for correctness.  In grading these problems, an emphasis will be placed on full explanations of your thought process.  You don't need to write more than a few sentences for any given problem, but you should write complete sentences!  Understanding and explaining the reasons behind what you are doing is at least as important as solving the problems correctly.
+
+Solutions to all problems will be provided.
+
+### Collaboration
+
+You are allowed to work with others on this assignment, but you must complete and submit your own write up.  You should not copy large blocks of code or written text from another student.
+
+### Sources
+
+You may refer to our text, Wikipedia, and other online sources.  All sources you refer to must be cited in the space I have provided at the end of this problem set.
+
+```{r}
+library(readr)
+turbine <- read_csv("https://sites.google.com/site/chiharahesterberg/data2/Turbine.csv")
+```
+### Problem I. Using your results from Problem II of the written part, program the Newton Raphson algorithm to find the maximum likelihood estimate for the parameter $k$ for the Weibull model for wind speed, using the turbine data included above. You will need to calculate the values of the first and second derivatives at each subsequent parameter guess as part of your algorithm.
+
+

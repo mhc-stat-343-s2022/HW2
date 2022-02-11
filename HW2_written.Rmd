@@ -1,0 +1,125 @@
+---
+title: "Homework 2: Written Part"
+subtitle: "STAT 343: Mathematical Statistics"
+output:
+  pdf_document:
+    keep_tex: true
+header-includes:
+   - \usepackage{booktabs}
+geometry: margin=1.5cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+\def\simiid{\stackrel{{\mbox{\text{\tiny i.i.d.}}}}{\sim}}
+
+# Details
+
+### How to Write Up
+
+The written part of this assignment can be either typeset using latex or hand written.
+
+### Grading
+
+5% of your grade on this assignment is for turning in something legible and organized.
+
+An additional 15% of your grade is for completion.  A quick pass will be made to ensure that you've made a reasonable attempt at all problems.
+
+Across both the written part and the R part, in the range of 1 to 3 problems will be graded more carefully for correctness.  In grading these problems, an emphasis will be placed on full explanations of your thought process.  You don't need to write more than a few sentences for any given problem, but you should write complete sentences!  Understanding and explaining the reasons behind what you are doing is at least as important as solving the problems correctly.
+
+Solutions to all problems will be provided.
+
+### Collaboration
+
+You are allowed to work with others on this assignment, but you must complete and submit your own write up.  You should not copy large blocks of code or written text from another student.
+
+### Sources
+
+You may refer to our text, Wikipedia, and other online sources.  All sources you refer to must be cited in the space I have provided at the end of this problem set.
+
+
+## Problem I: Method of Moments
+
+#### (1) Suppose that $X_i \simiid \text{Geometric}(p)$ for $i = 1, \ldots, n$.  Find the method of moments estimator of $p$.
+
+Note that there are multiple parameterizations of the Geometric distribution.  Please use the parameterization as given on the "Common Probability Distributions" handout.
+
+
+
+## Problem II: Wind Speeds
+
+This problem is adapted from an example in "Mathematical Statistics with Resampling and R" by Chihara and Hesterberg (2011), who write:
+
+> "[U]nderstanding the characteristics of wind speed is important.  Engineers use wind speed information to determine suitable locations to build a wind turbine or to optimize the design of a turbine.  Utility companies use this information to make predictions on engery avaiabilty during peak demand periods (say, during a heat wave) or to estimate yearly revenue.
+> The Weibull distribution is the most commonly used probability distribution used to model wind speed ... The Weibull distribution has a density function with two parameters, the shape parameter $k > 0$ and the scale parameter $\lambda > 0$."
+If $X \sim \text{Weibull}(k, \lambda)$, then it has pdf
+$$f(x | k, \lambda) = \frac{k x^{k - 1}}{\lambda^k}e^{-(x/\lambda)^k}$$
+
+We will consider fitting a Weibull distribution to measurements of daily average wind speeds in meters per second at the site of a wind turbine in Minnesota over the course of 168 days from February 14 to August 1, 2010 (there were no data for July 2).  Although these data are gathered over time, let's treat the measurements as independent (this is unrealistic but will make the problem more approachable).
+
+We adopt the model $X_1, \ldots, X_n \simiid \text{Weibull}(k, \lambda)$.
+
+The likelihood function is
+
+\begin{align*}
+\mathcal{L}(k, \lambda | x_1, \ldots, x_n) &= \prod_{i=1}^n \frac{k x_i^{k - 1}}{\lambda^k}e^{-(x_i/\lambda)^k} \\
+&= \frac{k^n}{\lambda^{kn}} \exp\left\{ -\sum_{i=1}^n (x_i / \lambda)^k \right\} \prod_{i=1}^n x_i^{k-1}
+\end{align*}
+
+The log-likelihood is
+
+$$\ell(k, \lambda | x_1, \ldots, x_n) = n \log(k) - kn \log(\lambda) + (k-1) \sum_{i=1}^n \log(x_i) - \sum_{i=1}^n \left(\frac{x_i}{\lambda}\right)^k$$
+
+The partial derivatives of the log-likelihood with respect to the unknown parameters are:
+
+\begin{equation}
+\frac{\partial}{\partial k} \ell(k, \lambda | x_1, \ldots, x_n) = \frac{n}{k} - n \log(\lambda) + \sum_{i=1}^n \log(x_i) - \sum_{i=1}^n \left(\frac{x_i}{\lambda}\right)^k \log\left(\frac{x_i}{\lambda}\right) \label{eqn:partial_wrt_k}
+\end{equation}
+
+and
+
+\begin{equation}
+\frac{\partial}{\partial \lambda} \ell(k, \lambda | x_1, \ldots, x_n) = \frac{-kn}{\lambda} + \frac{k}{\lambda^{k+1}}\sum_{i=1}^n x_i^k \label{eqn:partial_wrt_lambda}
+\end{equation}
+
+Setting \eqref{eqn:partial_wrt_lambda} equal to 0 and solving for $\lambda$ gives
+
+\begin{equation}
+\lambda = \left[ \frac{1}{n} \sum_{i=1}^n x_i^k \right]^{1/k}\label{eqn:lambda_sol}
+\end{equation}
+
+Substituting this into \eqref{eqn:partial_wrt_k} and setting it equal to 0 gives
+
+$$\frac{1}{k} + \frac{1}{n} \sum_{i=1}^n \log(x_i) - \frac{\sum_{i=1}^n x_i^k \log(x_i)}{\sum_{i=1}^n x_i^k} = 0$$
+
+This equation cannot be analytically solved for $k$; numerical optimization methods must be used to maximize the log-likelihood.  Note that if we plug \eqref{eqn:lambda_sol} back into the log-likelihood function, we obtain a function of just $k$ to maximize:
+
+\begin{align*}
+\tilde{\ell}(k | x_1, \ldots, x_n) &= n \log(k) - kn \log\left[\left\{ \frac{1}{n} \sum_{i=1}^n x_i^k \right\}^{1/k}\right] + (k-1) \sum_{i=1}^n \log(x_i) - \sum_{i=1}^n \left(\frac{x_i}{\left\{ \frac{1}{n} \sum_{i'=1}^n x_{i'}^k \right\}^{1/k}}\right)^k \\
+&= n \log(k) - n \log\left[\frac{1}{n} \sum_{i=1}^n x_i^k \right] + (k-1) \sum_{i=1}^n \log(x_i) - \sum_{i=1}^n \frac{x_i^k}{\frac{1}{n} \sum_{i'=1}^n x_{i'}^k} \\
+&= n \log(k) - n \log\left[\frac{1}{n} \sum_{i=1}^n x_i^k \right] + (k-1) \sum_{i=1}^n \log(x_i) - n \\
+\end{align*}
+
+This is not the log-likelihood function, but if we find the value of $k$ that maximizes $\tilde{\ell}(k | x_1, \ldots, x_n)$, we will have found the value of $k$ that maximizes the log-likelihood.
+
+The first and second derivatives of $\tilde{\ell}(k | x_1, \ldots, x_n)$ are:
+
+$$\frac{d}{dk} \tilde{\ell}(k | x_1, \ldots, x_n) = \frac{n}{k} - n \frac{\sum_{i=1}^n x_i^k \log(x_i)}{\sum_{i=1}^n x_i^k} + \sum_{i=1}^n \log(x_i)$$
+
+and
+
+$$\frac{d^2}{dk^2} \tilde{\ell}(k | x_1, \ldots, x_n) = \frac{-n}{k^2} - n \frac{\sum_{i=1}^n x_i^k \left\{\log(x_i)\right\}^2}{\sum_{i=1}^n x_i^k} - n \frac{\left\{\sum_{i=1}^n x_i^k \log(x_i)\right\}^2}{\left\{\sum_{i=1}^n x_i^k\right\}^2}$$
+
+#### (1) Write down a complete statement of a Newton algorithm for finding a maximum likelihood estimate of $k$ by maximizing the function $\tilde{\ell}$.  Your algorithm will run until either a user-specified maximum number of iterations is reached or a user-specified tolerance is reached for the magnitude of the change in estimates of $k$ on consecutive iterations.  Include a specific statement of how the estimate of $k$ will be updated in each iteration of the algorithm.  (You do not need to do any new calculus for this -- all the results you need are above.) Note: you are not being asked to actually program the algorithm.
+
+
+
+#### (2) Once the algorithm you specified in part (1) has finished running, how could you use the results to find the maximum likelihood estimate of $\lambda$?  (You can basically just write down one of the equations derived above.)
+
+
+
+#### (3) Write a 1 or 2 paragraph explanation of what Newton’s method is in the context of optimization.  Please explain what the goal of the method is, how the method works, and how it relates to Taylor’s theorem. You should include a supporting illustration (this can be drawn by hand).
+
